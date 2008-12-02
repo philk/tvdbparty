@@ -6,20 +6,21 @@ require "rubygems"
 require "httparty"
 require "cgi"
 require "curb"
+require "tvdbmapper"
 
 class TVShow
   include HTTParty
   format :xml
-  attr_accessor :mirror, :api_key, :series_name, :series_id, :series_info, :episodes, :actors
+  attr_accessor :mirror, :api_key, :series_name, :series_id, :series, :actors, :banners
   def initialize(api_key, params)
     @api_key = api_key
     @series_name = params[:series_name]
     @series_id = params[:series_id]
     begin
-      # The code in the comment below should work, but it doesn't.  I get a ParseException from REXML, but REXML can process it just fine normally.  TODO Track this down
-      # @mirror = self.class.get("www.thetvdb.com/api/#{@api_key}/mirrors.xml")["Mirrors"]["Mirror"]
       doc = REXML::Document.new(Curl::Easy.perform("www.thetvdb.com/api/#{@api_key}/mirrors.xml").body_str)
       total_mirrors = doc.elements["Mirrors"].get_elements("Mirror").size - 1
+      puts total_mirrors.class
+      puts total_mirrors
       if total_mirrors == 1
         @mirror = doc.elements["Mirrors"].get_elements("Mirror/mirrorpath")[0].text
       else
@@ -32,11 +33,7 @@ class TVShow
   end
   def check_series_id
     if @series_id == nil
-      if @series_name == nil
-        raise "Series ID or Name must be set"
-      else
-        get_series_by_name
-      end
+      raise "series_id must not be nil"
     end
   end
   def get_series_by_name # TODO : Find series by name?
@@ -55,31 +52,31 @@ class TVShow
       raise "Unexpected Data Type Returned #{res.class}"
     end
   end
-  # Returns nothing but sets the series_id and series_info
-  def get_series_by_id
+  def get_series_as_zip(path)
     check_series_id
-    res = self.class.get("/api/#{@api_key}/series/#{@series_id}/en.xml")["Data"]["Series"]
-    @series_id = res["seriesid"]
-    @series_info = res
-  end
-  def get_series_info
-    # TODO : Will return all info at once.
-  end
-  # Returns nothing but sets episodes value
-  def get_episodes
-    check_series_id
-    @episodes = self.class.get("/api/#{@api_key}/series/#{@series_id}/all/en.xml")["Data"]["Episode"]
-  end
-  # Takes a string and returns the hash for the episode requested.
-  def find_episode(number)
-    if @episodes == nil
-      get_episodes
+    if path.is_a? String
+      path = Pathname.new(path)
     end
-    if number.is_a?(String)
-      @episodes.select {|episode| episode["EpisodeNumber"] == number}
-    else
-      raise "String Needed"
-    end
+    Curl::Easy.download("http://zip.thetvdb.com/data/zip/en/#{@series_id}.zip", path + "testing.zip")
+
+    zipfile = Zip::ZipFile.open(path + "testing.zip")
+    zipfile.extract("en.xml", path + "en.xml")
+    zipfile.extract("actors.xml", path + "actors.xml")
+    zipfile.extract("banners.xml", path + "banners.xml")
+    zipfile.close
+
+    @series_xml = File.open(path + "en.xml", 'r').readlines.to_s
+    @actor_xml = File.open(path + "actors.xml", 'r').readlines.to_s
+    @banner_xml = File.open(path + "banners.xml", 'r').readlines.to_s
+
+    @series = TVDBMapper::Series.parse(@series_xml)
+    @actors = TVDBMapper::Actors.parse(@actor_xml)
+    @banners = TVDBMapper::Episodes.parse(@banner_xml)
+
+    FileUtils.rm(path + "en.xml")
+    FileUtils.rm(path + "actors.xml")
+    FileUtils.rm(path + "banners.xml")
+    FileUtils.rm(path + "testing.zip")
   end
 end
 

@@ -1,7 +1,7 @@
 tvdbparty
 =========
 
-Description goes here.
+A Ruby library to handle TheTVDB API.
 
 COPYRIGHT
 =========
