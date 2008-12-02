@@ -1,5 +1,5 @@
 =begin rdoc
-  This is a series of methods to access theTVDB's api.  You'll need an API key from TheTVDB to make it work.  It requires the absolutely amazing httparty gem (http://httparty.rubyforge.org/) which really does the heavy lifting for me.  It also requires curb (http://curb.rubyforge.org/) because it's faster and easier to use.
+  This is a series of methods to access theTVDB's api.  You'll need an API key from TheTVDB to make it work.  It requires the absolutely amazing httparty gem (http://httparty.rubyforge.org/) and the HappyMapper gem (http://happymapper.rubyforge.org/).  It also requires curb (http://curb.rubyforge.org/) because it's faster than Net:HTTP and easier to use (to me).
   Author::  Phil Kates (mailto:hawk684@gmail.com)
 =end
 require "rubygems"
