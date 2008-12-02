@@ -1,3 +1,7 @@
+=begin rdoc
+  This is a series of methods to access theTVDB's api.  You'll need an API key from TheTVDB to make it work.  It requires the absolutely amazing httparty gem (http://httparty.rubyforge.org/) which really does the heavy lifting for me.  It also requires curb (http://curb.rubyforge.org/) because it's faster and easier to use.
+  Author::  Phil Kates (mailto:hawk684@gmail.com)
+=end
 require "rubygems"
 require "httparty"
 require "cgi"
@@ -58,6 +62,9 @@ class TVShow
     @series_id = res["seriesid"]
     @series_info = res
   end
+  def get_series_info
+    # TODO : Will return all info at once.
+  end
   # Returns nothing but sets episodes value
   def get_episodes
     check_series_id
@@ -77,5 +84,3 @@ class TVShow
 end
 
 tvshow = TVShow.new("BC7240CD299E99B5", :series_name => "Eli Stone")
-
-p tvshow.find_episode("1")
