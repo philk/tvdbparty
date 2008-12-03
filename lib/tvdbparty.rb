@@ -4,7 +4,8 @@
 require "rubygems"
 require "httparty"
 require "cgi"
-require "curb"
+require "uri"
+require "net/http"
 require "tvdbmapper"
 
 =begin rdoc
@@ -22,7 +23,7 @@ class TVShow
     @series_name = params[:series_name]
     @series_id = params[:series_id]
     begin
-      doc = REXML::Document.new(Curl::Easy.perform("www.thetvdb.com/api/#{@api_key}/mirrors.xml").body_str)
+      doc = REXML::Document.new(Net::HTTP.get URI.parse("http://www.thetvdb.com/api/#{@api_key}/mirrors.xml"))
       total_mirrors = doc.elements["Mirrors"].get_elements("Mirror").size - 1
       if total_mirrors == 1
         @mirror = doc.elements["Mirrors"].get_elements("Mirror/mirrorpath")[0].text
@@ -55,7 +56,10 @@ class TVShow
     if path.is_a? String
       path = Pathname.new(path)
     end
-    Curl::Easy.download("http://zip.thetvdb.com/data/zip/en/#{@series_id}.zip", path + "testing.zip")
+    res = Net::HTTP.get URI.parse("http://zip.thetvdb.com/data/zip/en/#{@series_id}.zip")
+    file = File.open(path + "testing.zip", 'w')
+    file.write(res)
+    file.close
 
     zipfile = Zip::ZipFile.open(path + "testing.zip")
     zipfile.extract("en.xml", path + "en.xml")
@@ -83,7 +87,7 @@ class TVShow
     @episodes.select { |e| e.number == episode_number && e.season == season }.first
   end
   def get_episode_banner(image_path)
-    Curl::Easy.perform("http://images.thetvdb.com/banners/#{image_path}")
+    Net::HTTP.get URI.parse("http://images.thetvdb.com/banners/#{image_path}")
   end
   private
     def check_series_id

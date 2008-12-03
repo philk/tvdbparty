@@ -13,7 +13,8 @@ begin
     s.description = "TODO"
     s.authors = ["Phil Kates"]
     s.add_dependency "httparty"
-    s.add_dependency "curb"
+    s.add_dependency "happymapper"
+    # s.add_dependency "curb"
     s.files = FileList["lib/*"]
     s.has_rdoc = true
   end
