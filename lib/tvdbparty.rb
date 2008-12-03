@@ -11,7 +11,7 @@ require "tvdbmapper"
 class TVShow
   include HTTParty
   format :xml
-  attr_accessor :mirror, :api_key, :series_name, :series_id, :series, :actors, :banners
+  attr_accessor :mirror, :api_key, :series_name, :series_id, :series, :actors, :episodes, :banners
   def initialize(api_key, params)
     @api_key = api_key
     @series_name = params[:series_name]
@@ -70,14 +70,24 @@ class TVShow
     @banner_xml = File.open(path + "banners.xml", 'r').readlines.to_s
 
     @series = TVDBMapper::Series.parse(@series_xml)
+    @episodes = TVDBMapper::Episodes.parse(@series_xml)
     @actors = TVDBMapper::Actors.parse(@actor_xml)
-    @banners = TVDBMapper::Episodes.parse(@banner_xml)
+    @banners = TVDBMapper::Banners.parse(@banner_xml)
 
     FileUtils.rm(path + "en.xml")
     FileUtils.rm(path + "actors.xml")
     FileUtils.rm(path + "banners.xml")
     FileUtils.rm(path + "testing.zip")
   end
+  def find_by_episode(season, episode_number)
+    season = season.to_s
+    episode_number = episode_number.to_s
+    @episodes.select { |e| e.number == episode_number && e.season == season }.first
+  end
+  def get_episode_banner(image_path)
+    Curl::Easy.perform("http://images.thetvdb.com/banners/#{image_path}")
+  end
 end
 
 tvshow = TVShow.new("BC7240CD299E99B5", :series_name => "Eli Stone")
+tvshow.get_series_by_name
