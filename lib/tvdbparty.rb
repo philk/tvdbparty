@@ -1,6 +1,5 @@
 =begin rdoc
-  This is a series of methods to access theTVDB's api.  You'll need an API key from TheTVDB to make it work.  It requires the absolutely amazing httparty gem (http://httparty.rubyforge.org/) and the HappyMapper gem (http://happymapper.rubyforge.org/).  It also requires curb (http://curb.rubyforge.org/) because it's faster than Net:HTTP and easier to use (to me).
-  Author::  Phil Kates (mailto:hawk684@gmail.com)
+  Author:  Phil Kates (mailto:me@philkates.com)
 =end
 require "rubygems"
 require "httparty"
@@ -8,12 +7,18 @@ require "cgi"
 require "curb"
 require "tvdbmapper"
 
+=begin rdoc
+Create a TVShow.new like this.
+  tvshow = TVShow.new(:series_name => "The Wire")
+OR
+  tvshow = TVShow.new(:series_id => "79126")
+=end
 class TVShow
   include HTTParty
   format :xml
-  attr_accessor :mirror, :api_key, :series_name, :series_id, :series, :actors, :episodes, :banners
-  def initialize(api_key, params)
-    @api_key = api_key
+  attr_accessor :mirror, :series_name, :series_id, :series, :actors, :episodes, :banners
+  def initialize(params)
+    @api_key = "BC7240CD299E99B5"
     @series_name = params[:series_name]
     @series_id = params[:series_id]
     begin
@@ -31,20 +36,15 @@ class TVShow
     end
     self.class.base_uri @mirror
   end
-  def check_series_id
-    if @series_id == nil
-      raise "series_id must not be nil"
-    end
-  end
   def get_series_by_name # TODO : Find series by name?
     res = self.class.get("/api/GetSeries.php?seriesname=" + CGI::escape(@series_name.to_s))
     if res["Data"].to_s =~ /.*connection to localhost.*/
       raise "TVDB API Down"
     else
       res = res["Data"]["Series"]
-      @series_id = res["seriesid"]
     end
     if res.is_a?(Hash)
+      @series_id = res["seriesid"]
       return [res]
     elsif res.is_a?(Array)
       return res
@@ -87,7 +87,10 @@ class TVShow
   def get_episode_banner(image_path)
     Curl::Easy.perform("http://images.thetvdb.com/banners/#{image_path}")
   end
+  private
+    def check_series_id
+      if @series_id == nil
+        raise "series_id must not be nil"
+      end
+    end
 end
-
-tvshow = TVShow.new("BC7240CD299E99B5", :series_name => "Eli Stone")
-tvshow.get_series_by_name

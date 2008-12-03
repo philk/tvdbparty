@@ -1,7 +1,10 @@
 tvdbparty
 =========
 
-A Ruby library to handle TheTVDB API.
+This is a series of methods to access theTVDB's API.  Please be gentle on their servers and if you notice some information is missing or wrong feel free to contribute to the site (they're totally cooler than old Mr. NoAPI IMDB).  If you think this class is stupid and would like to teach my newbie self how to program, please feel free to fork it or email me.
+Requires the absolutely amazing httparty gem (http://httparty.rubyforge.org/), the HappyMapper gem (http://happymapper.rubyforge.org/), curb (http://curb.rubyforge.org/) because it's faster than Net:HTTP and easier to use (IMO), and the rubyzip gem (http://rubyzip.sourceforge.net/) to extract the zipfile grabbed from TheTVDB.
+
+Author:  Phil Kates (mailto:me@philkates.com)
 
 COPYRIGHT
 =========

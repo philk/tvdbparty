@@ -1,3 +1,6 @@
+=begin rdoc
+This is just HappyMapper classes for the various XML files that come out of the zip file from TheTVDB.  I didn't map everything, just the ones that seemed important.
+=end
 require "rubygems"
 require "zip/zip"
 require "happymapper"
