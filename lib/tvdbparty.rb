@@ -67,7 +67,7 @@ class TVShow
     @actor_xml = File.open(path + "actors.xml", 'r').readlines.to_s
     @banner_xml = File.open(path + "banners.xml", 'r').readlines.to_s
 
-    @series = TVDBMapper::Series.parse(@series_xml)
+    @series = TVDBMapper::Series.parse(@series_xml).first
     @episodes = TVDBMapper::Episodes.parse(@series_xml)
     @actors = TVDBMapper::Actors.parse(@actor_xml)
     @banners = TVDBMapper::Banners.parse(@banner_xml)
