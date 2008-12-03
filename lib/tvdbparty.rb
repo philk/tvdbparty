@@ -24,8 +24,6 @@ class TVShow
     begin
       doc = REXML::Document.new(Curl::Easy.perform("www.thetvdb.com/api/#{@api_key}/mirrors.xml").body_str)
       total_mirrors = doc.elements["Mirrors"].get_elements("Mirror").size - 1
-      puts total_mirrors.class
-      puts total_mirrors
       if total_mirrors == 1
         @mirror = doc.elements["Mirrors"].get_elements("Mirror/mirrorpath")[0].text
       else
