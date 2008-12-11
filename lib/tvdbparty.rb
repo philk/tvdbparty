@@ -22,17 +22,8 @@ class TVShow
     @api_key = "BC7240CD299E99B5"
     @series_name = params[:series_name]
     @series_id = params[:series_id]
-    begin
-      doc = REXML::Document.new(Net::HTTP.get URI.parse("http://www.thetvdb.com/api/#{@api_key}/mirrors.xml"))
-      total_mirrors = doc.elements["Mirrors"].get_elements("Mirror").size - 1
-      if total_mirrors == 1
-        @mirror = doc.elements["Mirrors"].get_elements("Mirror/mirrorpath")[0].text
-      else
-        @mirror = doc.elements["Mirrors"].get_elements("Mirror/mirrorpath")[rand(total_mirrors) - 1].text
-      end
-    rescue REXML::ParseException => e
-      puts e
-    end
+    result = self.class.get("http://www.thetvdb.com/api/#{@api_key}/mirrors.xml")
+    @mirror = result["Mirrors"]["Mirror"]["mirrorpath"]
     self.class.base_uri @mirror
   end
   def get_series_by_name # TODO : Find series by name?
