@@ -6,7 +6,6 @@ require "httparty"
 require "cgi"
 require "uri"
 require "net/http"
-require "tvdbmapper"
 
 =begin rdoc
 Create a TVShow.new like this.
@@ -14,7 +13,7 @@ Create a TVShow.new like this.
 OR
   tvshow = TVShow.new(:series_id => "79126")
 =end
-class TVShow
+class TVDB
   include HTTParty
   format :xml
   attr_accessor :mirror, :series_name, :series_id, :series, :actors, :episodes, :banners
@@ -89,10 +88,37 @@ class TVShow
   def get_episode_banner(image_path)
     Net::HTTP.get URI.parse("http://images.thetvdb.com/banners/#{image_path}")
   end
+  def get_series_info
+    res = self.class.get("/api/#{@api_key}/series/#{@series_id}/all/en.xml")
+    @series = res["Data"]["Series"]
+    @episodes = res["Data"]["Episode"]
+  end
+  def get_actor_info
+    self.class.get("/api/#{@api_key}/series/#{@series_id}/actors.xml")["Actors"]["Actor"]
+  end
+  def get_banner_info
+    self.class.get("/api/#{@api_key}/series/#{@series_id}/banners.xml")["Banners"]["Banner"]
+  end
   private
     def check_series_id
       if @series_id == nil
         raise "series_id must not be nil"
       end
     end
+end
+
+class Show
+  attr_accessor :id, :actors, :overview, :seriesid, :seriesname, :genre, :imdb, :language, :network, :rating, :zap2it,
+              :episodes, :banners
+  def initialize(series, episodes)
+    @id = series["id"]
+    @actors = series["Actors"]
+    @overview = series["Overview"]
+    @episodes = episodes
+  end
+  def find_episode(season, episode_number)
+    season = season.to_s
+    episode_number = episode_number.to_s
+    @episodes.select { |e| e["EpisodeNumber"] == episode_number && e["SeasonNumber"] == season }.first 
+  end
 end
