@@ -12,7 +12,7 @@ begin
     s.homepage = "http://github.com/philk/tvdbparty"
     s.description = "TODO"
     s.authors = ["Phil Kates"]
-    s.add_dependency "httparty"
+    s.add_dependency "httparty", [">=0.2.2"]
     s.add_dependency "happymapper"
     # s.add_dependency "curb"
     s.files = FileList["lib/*"]
